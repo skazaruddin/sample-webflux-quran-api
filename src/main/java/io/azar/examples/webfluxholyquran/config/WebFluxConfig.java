@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -63,7 +64,8 @@ public class WebFluxConfig implements WebFluxConfigurer {
      * @throws Exception If there is an issue during truststore creation or HttpClient configuration.
      */
     @Bean
-    public WebClient getWebClient() throws Exception {
+    @Profile({"production"})
+    public WebClient getHttpsWebClient() throws Exception {
 
         List<X509Certificate> x509Certificates = CertUtils.loadCertificates(apiConfigurationProperties.getQuranapi().getTruststore().getCertificates());
 
@@ -85,6 +87,36 @@ public class WebFluxConfig implements WebFluxConfigurer {
                                 .trustManager(x509Certificates)
                                 .protocols("TLSv1.3")
                                 .ciphers(apiConfigurationProperties.getQuranapi().getTruststore().getCiphers())));
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(client))
+                .baseUrl(apiConfigurationProperties.getQuranapi().getHost())
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .codecs(
+                        clientCodeConfigurer ->{
+                            clientCodeConfigurer.customCodecs().register(new Jackson2JsonDecoder());
+                            clientCodeConfigurer.customCodecs().register(new Jackson2JsonEncoder());
+                        }
+                )
+                .build();
+    }
+
+
+    @Bean
+    @Profile({"unit-test", "local", "docker"})
+    public WebClient getHttpWebClient() throws Exception {
+
+        HttpClient client = HttpClient.create()
+                .followRedirect(false)
+                .disableRetry(true)
+                .keepAlive(true)
+                .responseTimeout(Duration.ofSeconds(apiConfigurationProperties.getQuranapi().getConnection().getWriteTimeoutSeconds()))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, apiConfigurationProperties.getQuranapi().getConnection().getConnectTimeoutSeconds() * 1000)
+                .doOnConnected(connection -> connection
+                        .addHandlerFirst(new ReadTimeoutHandler(apiConfigurationProperties.getQuranapi().getConnection().getReadTimeoutSeconds(), TimeUnit.SECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(apiConfigurationProperties.getQuranapi().getConnection().getWriteTimeoutSeconds(), TimeUnit.SECONDS)))
+
+                .option(ChannelOption.SO_KEEPALIVE, apiConfigurationProperties.getQuranapi().getConnection().isKeepAlive())
+                .option(ChannelOption.TCP_NODELAY, apiConfigurationProperties.getQuranapi().getConnection().isTcpNoDelay());
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(client))
                 .baseUrl(apiConfigurationProperties.getQuranapi().getHost())

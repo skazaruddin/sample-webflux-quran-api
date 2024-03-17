@@ -3,12 +3,12 @@ package io.azar.examples.webfluxholyquran.repository;
 import io.azar.examples.webfluxholyquran.config.ApiConfigurationProperties;
 import io.azar.examples.webfluxholyquran.dto.ApiError;
 import io.azar.examples.webfluxholyquran.dto.SurahResponseDto;
+import io.azar.examples.webfluxholyquran.exceptions.BusinessException;
+import io.azar.examples.webfluxholyquran.exceptions.TechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -26,32 +26,10 @@ public class QuranRepositoryImpl implements QuranRepository {
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is4xxClientError,
-                        this::handleClientError
-                )
+                        response -> response.bodyToMono(ApiError.class).map(BusinessException::new))
                 .onStatus(
                         HttpStatusCode::is5xxServerError,
-                        this::handleServerError
-                )
+                        response -> response.bodyToMono(ApiError.class).map(TechnicalException::new))
                 .bodyToMono(SurahResponseDto.class);
-    }
-    private Mono<? extends Throwable> handleClientError(ClientResponse clientResponse) {
-        return clientResponse.bodyToMono(ApiError.class)
-                .flatMap(apiError -> Mono.error(
-                        new ResponseStatusException(
-                                HttpStatusCode.valueOf(clientResponse.statusCode().value()),
-                                apiError.getMessage()
-                        )
-                ));
-    }
-
-    private Mono<? extends Throwable> handleServerError(ClientResponse clientResponse) {
-        // Handle 5xx errors, if needed
-        return clientResponse.bodyToMono(ApiError.class)
-                .flatMap(apiError -> Mono.error(
-                        new ResponseStatusException(
-                                HttpStatusCode.valueOf(clientResponse.statusCode().value()),
-                                apiError.getMessage()
-                        )
-                ));
     }
 }

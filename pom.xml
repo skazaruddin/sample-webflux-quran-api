@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.azar.examples</groupId>
 	<artifactId>webflux-holyquran-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>webflux-holyquran-api</name>
 	<description>An WebFlux based REST API to fetch quran surah in integration layer and invoking core-services running in backend systems.</description>
 	<properties>
@@ -57,6 +57,12 @@
 			<artifactId>bcpkix-jdk15on</artifactId>
 			<version>1.68</version> <!-- Use the same version as bcprov -->
 		</dependency>
+
+		<dependency>
+			<groupId>de.codecentric</groupId>
+			<artifactId>spring-boot-admin-starter-client</artifactId>
+			<version>3.1.5</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
@@ -76,11 +82,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<image>
-						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
-					</image>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

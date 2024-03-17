@@ -1,6 +1,6 @@
 api:
   quranapi:
-    host: https://api.alquran.cloud
+    host: http://localhost:${wiremock.server.port}
     connection:
       connectTimeoutSeconds: 10
       readTimeoutSeconds: 50
@@ -70,18 +70,3 @@ api:
         he8Y4IWS6wY7bCkjCWDcRQJMEhg76fsO3txE+FiYruq9RUWhiF1myv4Q6W+CyBFC
         Dfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5
         -----END CERTIFICATE-----
-
-
-spring:
-  boot:
-    admin:
-      client:
-        url: http://localhost:9085
-
-management:
-  endpoints:
-   web:
-     exposure:
-      include: "*"
-   health:
-     show-details: ALWAYS

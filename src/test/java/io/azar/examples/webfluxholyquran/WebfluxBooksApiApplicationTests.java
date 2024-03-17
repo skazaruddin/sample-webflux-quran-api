@@ -7,22 +7,31 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @AutoConfigureWireMock(port = 0)
 @TestPropertySource(properties = {
-        "api.alquran.host=http://localhost:${wiremock.server.port}"
+        "api.quranapi.host=http://localhost:${wiremock.server.port}"
 })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles({"unit-test"})
 public class WebfluxBooksApiApplicationTests {
 
     @Autowired
     private WebTestClient webTestClient;
 
+    /**
+     * Tests the successful retrieval of Surah information from the API.
+     * <p>
+     * This test case performs an HTTP GET request to the Surah endpoint of the API and expects a successful response.
+     * It verifies the correctness of the returned SurahResponseDto object and its associated fields.
+     */
     @Test
-    public void testSuccessGetSurahEndpoint() {
+    public void shouldRetrieveSurahInformationSuccessfullyTest() {
         int chapter = 114;
         String edition = "en.asad";
 
@@ -35,9 +44,6 @@ public class WebfluxBooksApiApplicationTests {
                 .expectBody(SurahResponseDto.class)
                 .consumeWith(response -> {
                     SurahResponseDto surahResponseDto = response.getResponseBody();
-                    // Add assertions based on the expected response
-                    // For example, you can check the values in surahResponseDto
-                    // Assertions for the main structure
                     Assertions.assertNotNull(surahResponseDto);
                     Assertions.assertEquals(200, surahResponseDto.getCode());
                     Assertions.assertEquals("OK", surahResponseDto.getStatus());
@@ -82,8 +88,15 @@ public class WebfluxBooksApiApplicationTests {
                 });
     }
 
+    /**
+     * Tests the behavior of the Surah endpoint when providing a bad request.
+     * <p>
+     * This test case performs an HTTP GET request to the Surah endpoint with an invalid chapter number.
+     * It expects the endpoint to return a 400 Bad Request status along with an error message indicating that
+     * the requested chapter does not exist in the target system.
+     */
     @Test
-    public void testBadRequestGetSurahEndpoint() {
+    public void shouldReturnBadRequestForInvalidChapterNumberTest() {
         int chapter = 1141;
         String edition = "en.asad";
 
@@ -96,13 +109,37 @@ public class WebfluxBooksApiApplicationTests {
                 .expectBody(ApiError.class)
                 .consumeWith(response -> {
                     ApiError apiError = response.getResponseBody();
-                    // Add assertions based on the expected response
-                    // For example, you can check the values in surahResponseDto
-                    // Assertions for the main structure
+                    Assertions.assertNotNull(apiError);
+                    Assertions.assertEquals("23", apiError.getCode());
+                    Assertions.assertEquals("Chapter doesn't exist in target system.", apiError.getMessage());
+                });
+    }
+
+
+    /**
+     * Tests the behavior of the Surah endpoint when the service is temporarily unavailable.
+     * <p>
+     * This test case performs an HTTP GET request to the Surah endpoint with a chapter number while service doesn't have capacity to handle more requests.
+     * It expects the endpoint to return a 5xx Server Error status along with an error message indicating that
+     * the service is temporarily unavailable.
+     */
+    @Test
+    public void shouldReturnServiceUnavailableTest() {
+        int chapter = 1150;
+        String edition = "en.asad";
+
+        // Perform the HTTP GET request using WebTestClient
+        webTestClient.get()
+                .uri("/v1/surah/{chapter}/{edition}", chapter, edition)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody(ApiError.class)
+                .consumeWith(response -> {
+                    ApiError apiError = response.getResponseBody();
                     Assertions.assertNotNull(apiError);
                     Assertions.assertEquals("05", apiError.getCode());
-                    Assertions.assertEquals("Chapter doesn't exist in target system.", apiError.getMessage());
-
+                    Assertions.assertEquals("The service is temporarily unavailable.", apiError.getMessage());
                 });
     }
 }
