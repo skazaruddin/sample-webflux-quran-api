@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.azar.examples</groupId>
-	<artifactId>webflux-holyquran-api</artifactId>
+	<artifactId>holyquran-api</artifactId>
 	<version>1.0.0</version>
-	<name>webflux-holyquran-api</name>
+	<name>holyquran-api</name>
 	<description>An WebFlux based REST API to fetch quran surah in integration layer and invoking core-services running in backend systems.</description>
 	<properties>
 		<java.version>17</java.version>
@@ -58,17 +58,34 @@
 			<version>1.68</version> <!-- Use the same version as bcprov -->
 		</dependency>
 
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-client</artifactId>
-			<version>3.1.5</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>de.codecentric</groupId>-->
+<!--			<artifactId>spring-boot-admin-starter-client</artifactId>-->
+<!--			<version>3.1.5</version>-->
+<!--		</dependency>-->
 
 		<!-- Micrometer Prometheus registry  -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!--OpenTelemetry Tracer: Bridges the Micrometer Observation API to OpenTelemetry-->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-otel</artifactId>
+		</dependency>
+
+		<!--Reporter/Zipkin with OpenTelemetry: Reports traces to Zipkin-->
+<!--		<dependency>-->
+<!--			<groupId>io.opentelemetry</groupId>-->
+<!--			<artifactId>opentelemetry-exporter-zipkin</artifactId>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<dependencyManagement>

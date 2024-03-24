@@ -1,39 +1,32 @@
 version: '3.8'
 
 services:
-  booksapi:
+  holyquranapi:
     build: .
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - api.quranapi.host=http://docker-wiremock:8080
-    container_name: webflux-holyquran-api
+      - api.quranapi.host=http://docker-wiremock:9021
+    container_name: holyquran-api
     ports:
       - "8080:8080"
     depends_on:
       - docker-wiremock
-      - springadmin
-      - prometheus
-      - grafana
     deploy:
       resources:
         limits:
-          cpus: '400m' # Example: limit to 400m milli cpu, given a core is of 1000 millicpu
-          memory: '512M' # Example: limit to 512 megabytes of memory
-    links:
-      - docker-wiremock
-      - springadmin
-      - prometheus
-      - grafana
+          cpus: '300m' # Example: limit to 400m milli cpu, given a core is of 1000 millicpu
+          memory: '256M' # Example: limit to 512 megabytes of memory
     networks:
       - myNetwork
 
   docker-wiremock:
-    image: wiremock/wiremock:latest
+    build: ./wiremock/
     container_name: docker-wiremock
     volumes:
-      - ./wiremock:/home/wiremock/
+      - ./wiremock/__files:/home/wiremock/__files
+      - ./wiremock/mappings:/home/wiremock/mappings
     ports:
-      - "9021:8080"  # Adjusted port mapping
+      - "9021:9021"  # Adjusted port mapping
     deploy:
       resources:
         limits:
@@ -42,23 +35,23 @@ services:
     networks:
       - myNetwork
 
-  springadmin:
-    image: codecentric/spring-boot-admin:3.0
-    ports:
-      - "9085:9085"
-    environment:
-      SPRING_BOOT_ADMIN_CONTEXT_PATH: /
-    command: --spring.boot.admin.context-path=/
-    deploy:
-      resources:
-        limits:
-          cpus: '500m' # Example: limit to 50% of one CPU core
-          memory: '512M' # Example: limit to 512 megabytes of memory
-    networks:
-      - myNetwork
-    volumes:
-      - ./monitoring/spring-boot-admin/application.yml:/application.yml
-      - ./monitoring/spring-boot-admin/application.properties:/application.properties
+#  springadmin:
+#    image: codecentric/spring-boot-admin:3.0
+#    ports:
+#      - "9085:9085"
+#    environment:
+#      SPRING_BOOT_ADMIN_CONTEXT_PATH: /
+#    command: --spring.boot.admin.context-path=/
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '500m' # Example: limit to 50% of one CPU core
+#          memory: '512M' # Example: limit to 512 megabytes of memory
+#    networks:
+#      - myNetwork
+#    volumes:
+#      - ./monitoring/spring-boot-admin/application.yml:/application.yml
+#      - ./monitoring/spring-boot-admin/application.properties:/application.properties
 
 
   prometheus:
@@ -67,17 +60,42 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+    networks:
+      - myNetwork
+#    links:
+#      - grafana
+#      - holyquranapi
 
   grafana:
-      image: grafana/grafana:9.5.2
+      image: grafana/grafana-oss:latest
       container_name: grafana
+      environment:
+        - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+        - GF_SECURITY_ADMIN_PASSWORD=admin
+#        - GF_USERS_ALLOW_SIGN_UP=false
+#        - GF_AUTH_ANONYMOUS_ENABLED=true #Enabled the Anonymous user no user/pass needed
+#        - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer #Activate the ROLE VIEWER as Default
+#        - GF_AUTH_BASIC_ENABLED=false #Disable the AUTH Method
+#        - GF_AUTH_DISABLE_LOGIN_FORM=true #Disable the login on show
+#        - GF_AUTH_DISABLE_SIGNOUT_MENU=true #Diabled the menu
+#        - GF_SECURITY_ALLOW_EMBEDDING=true #Allow IFRAME Calls
+#        - GF_SERVER_SERVE_FROM_SUB_PATH=true
+#        - GF_SERVE_FROM_SUB_PATH=true
+#        - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource"
       ports:
         - "3000:3000"
       restart: unless-stopped
       volumes:
-        - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-
+        - ./monitoring/grafana/provisioning/:/etc/grafana/provisioning/
+#        - ./monitoring/grafana/provisioning/dashboard/:/etc/grafana/provisioning/dashboards
+#        - ./monitoring/grafana/provisioning/dashboard/:/var/lib/grafana/dashboards
+#      depends_on:
+#        - prometheus
+#      links:
+#        - prometheus
+      networks:
+        - myNetwork
 networks:
   myNetwork:
     driver: bridge

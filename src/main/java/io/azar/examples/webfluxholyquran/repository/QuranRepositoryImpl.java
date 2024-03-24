@@ -20,9 +20,9 @@ public class QuranRepositoryImpl implements QuranRepository {
 
     @Override
     public Mono<SurahResponseDto> findSurahByChapterAndEdition(Integer surah, String edition) {
-        String apiEndpoint = String.format(apiConfigurationProperties.getQuranapi().getHost() + "/v1/surah/%d/%s", surah, edition);
+        String uri = String.format("/v1/surah/%d/%s", surah, edition);
         return webClient.get()
-                .uri(apiEndpoint)
+                .uri(uri)
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is4xxClientError,

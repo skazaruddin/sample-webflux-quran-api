@@ -3,12 +3,9 @@ import { sleep } from 'k6';
 
 export let options = {
   stages: [
-    { duration: '1m', target: 120 },   // Ramp up to 10 VUs over 1 minute
-    { duration: '2m', target: 230 },   // Stay at 10 VUs for 2 minutes
-    { duration: '1m', target: 240 },  // Ramp up to 20 VUs over 1 minute
-    { duration: '2m', target: 250 },  // Stay at 20 VUs for 2 minutes
-    { duration: '1m', target: 260 },  // Ramp up to 30 VUs over 1 minute
-    { duration: '2m', target: 300 },  // Stay at 30 VUs for 2 minutes
+    { duration: '1m', target: 500 },   // Ramp up to 10 VUs over 1 minute
+    { duration: '2m', target: 1000 },   // Stay at 10 VUs for 2 minutes
+    { duration: '2m', target: 1500 },  // Ramp up to 20 VUs over 1 minute
     { duration: '1m', target: 0 },   // Ramp down to 0 VUs over 1 minute
   ],
   thresholds: {

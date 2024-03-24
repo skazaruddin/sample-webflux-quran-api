@@ -1,6 +1,9 @@
 package io.azar.examples.webfluxholyquran.config;
 
 import io.azar.examples.webfluxholyquran.util.CertUtils;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler;
+import io.micrometer.observation.ObservationRegistry;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -65,7 +68,7 @@ public class WebFluxConfig implements WebFluxConfigurer {
      */
     @Bean
     @Profile({"production"})
-    public WebClient getHttpsWebClient() throws Exception {
+    public WebClient getHttpsWebClient(WebClient.Builder builder) throws Exception {
 
         List<X509Certificate> x509Certificates = CertUtils.loadCertificates(apiConfigurationProperties.getQuranapi().getTruststore().getCertificates());
 
@@ -87,7 +90,9 @@ public class WebFluxConfig implements WebFluxConfigurer {
                                 .trustManager(x509Certificates)
                                 .protocols("TLSv1.3")
                                 .ciphers(apiConfigurationProperties.getQuranapi().getTruststore().getCiphers())));
-        return WebClient.builder()
+
+
+        return builder
                 .clientConnector(new ReactorClientHttpConnector(client))
                 .baseUrl(apiConfigurationProperties.getQuranapi().getHost())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -103,7 +108,7 @@ public class WebFluxConfig implements WebFluxConfigurer {
 
     @Bean
     @Profile({"unit-test", "local", "docker"})
-    public WebClient getHttpWebClient() throws Exception {
+    public WebClient getHttpWebClient(WebClient.Builder builder) throws Exception {
 
         HttpClient client = HttpClient.create()
                 .followRedirect(false)
@@ -117,7 +122,8 @@ public class WebFluxConfig implements WebFluxConfigurer {
 
                 .option(ChannelOption.SO_KEEPALIVE, apiConfigurationProperties.getQuranapi().getConnection().isKeepAlive())
                 .option(ChannelOption.TCP_NODELAY, apiConfigurationProperties.getQuranapi().getConnection().isTcpNoDelay());
-        return WebClient.builder()
+
+        return builder
                 .clientConnector(new ReactorClientHttpConnector(client))
                 .baseUrl(apiConfigurationProperties.getQuranapi().getHost())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
