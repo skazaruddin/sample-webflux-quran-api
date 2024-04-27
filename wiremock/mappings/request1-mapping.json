@@ -6,7 +6,7 @@
   },
   "response": {
     "status": 200,
-    "fixedDelayMilliseconds": "200",
+    "fixedDelayMilliseconds": "500",
     "bodyFileName": "en-surah-114.json",
     "headers": {
       "Content-Type": "application/json"

@@ -13,23 +13,24 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public class QuranRepositoryImpl implements QuranRepository {
-    @Autowired
-    private WebClient webClient;
-    @Autowired
-    private ApiConfigurationProperties apiConfigurationProperties;
 
-    @Override
-    public Mono<SurahResponseDto> findSurahByChapterAndEdition(Integer surah, String edition) {
-        String uri = String.format("/v1/surah/%d/%s", surah, edition);
-        return webClient.get()
-                .uri(uri)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::is4xxClientError,
-                        response -> response.bodyToMono(ApiError.class).map(BusinessException::new))
-                .onStatus(
-                        HttpStatusCode::is5xxServerError,
-                        response -> response.bodyToMono(ApiError.class).map(TechnicalException::new))
-                .bodyToMono(SurahResponseDto.class);
-    }
+	@Autowired
+	private WebClient webClient;
+
+	@Autowired
+	private ApiConfigurationProperties apiConfigurationProperties;
+
+	@Override
+	public Mono<SurahResponseDto> findSurahByChapterAndEdition(Integer surah, String edition) {
+		String uri = String.format("/v1/surah/%d/%s", surah, edition);
+		return webClient.get()
+			.uri(uri)
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError,
+					response -> response.bodyToMono(ApiError.class).map(BusinessException::new))
+			.onStatus(HttpStatusCode::is5xxServerError,
+					response -> response.bodyToMono(ApiError.class).map(TechnicalException::new))
+			.bodyToMono(SurahResponseDto.class);
+	}
+
 }

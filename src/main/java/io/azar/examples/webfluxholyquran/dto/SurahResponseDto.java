@@ -9,58 +9,87 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Builder
 public class SurahResponseDto {
 
-    private int code;
-    private String status;
-    private Data data;
+	private int code;
 
-    // Constructors, getters, and setters
-    @lombok.Data
-    public static class Data {
-        private int number;
-        private String name;
-        @JsonProperty("englishName")
-        private String englishName;
-        @JsonProperty("englishNameTranslation")
-        private String englishNameTranslation;
-        @JsonProperty("revelationType")
-        private String revelationType;
-        @JsonProperty("numberOfAyahs")
-        private int numberOfAyahs;
-        private List<Ayah> ayahs;
-        private Edition edition;
+	private String status;
 
-        // Constructors, getters, and setters
-    }
+	private Data data;
 
-    @lombok.Data
-    public static class Ayah {
-        private int number;
-        private String text;
-        @JsonProperty("numberInSurah")
-        private int numberInSurah;
-        private int juz;
-        private int manzil;
-        private int page;
-        private int ruku;
-        @JsonProperty("hizbQuarter")
-        private int hizbQuarter;
-        private boolean sajda;
+	// Constructors, getters, and setters
+	@lombok.Data
+	public static class Data {
 
-        // Constructors, getters, and setters
-    }
+		private int number;
 
-    @lombok.Data
-    public static class Edition {
-        private String identifier;
-        private String language;
-        private String name;
-        @JsonProperty("englishName")
-        private String englishName;
-        private String format;
-        private String type;
-        private String direction;
+		private String name;
 
-        // Constructors, getters, and setters
-    }
+		@JsonProperty("englishName")
+		private String englishName;
+
+		@JsonProperty("englishNameTranslation")
+		private String englishNameTranslation;
+
+		@JsonProperty("revelationType")
+		private String revelationType;
+
+		@JsonProperty("numberOfAyahs")
+		private int numberOfAyahs;
+
+		private List<Ayah> ayahs;
+
+		private Edition edition;
+
+		// Constructors, getters, and setters
+
+	}
+
+	@lombok.Data
+	public static class Ayah {
+
+		private int number;
+
+		private String text;
+
+		@JsonProperty("numberInSurah")
+		private int numberInSurah;
+
+		private int juz;
+
+		private int manzil;
+
+		private int page;
+
+		private int ruku;
+
+		@JsonProperty("hizbQuarter")
+		private int hizbQuarter;
+
+		private boolean sajda;
+
+		// Constructors, getters, and setters
+
+	}
+
+	@lombok.Data
+	public static class Edition {
+
+		private String identifier;
+
+		private String language;
+
+		private String name;
+
+		@JsonProperty("englishName")
+		private String englishName;
+
+		private String format;
+
+		private String type;
+
+		private String direction;
+
+		// Constructors, getters, and setters
+
+	}
+
 }
-

@@ -88,3 +88,7 @@ management:
    tracing:
     sampling:
       probability: 1.0  # tracing changed to 100% for development. Default is 10% is 0.1. Should be made 0.1 in prod environments for optimal app performance
+
+#  spring:
+#    messages:
+#      basename: messages

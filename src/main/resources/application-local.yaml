@@ -8,3 +8,6 @@ api:
       keep-alive: true
       tcp-no-delay: true
 
+spring:
+    messages:
+      basename: messages

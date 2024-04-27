@@ -95,7 +95,7 @@ To run the application locally, follow these steps:
 
 ### Prerequisites
 
-- Java 11 or later
+- Java 17 or later
 - Maven
 
 ### Installation
@@ -124,6 +124,106 @@ Explore the API by accessing the provided endpoints. For example:
     ```bash
     curl http://localhost:8080/v1/surah/1/en.asad
     ```
+
+**Performance Testing of Holy Quran API**
+=====================================
+
+**Overview**
+------------
+
+This document outlines the performance testing strategy and configuration for the Holy Quran API. The API is built using Spring Boot and uses WireMock for mocking backend services. The performance testing is done using Docker containers,Grafana, K6 and Prometheus for monitoring.
+
+**Goals**
+---------------------------
+
+* Measure the response time and throughput of the API under various loads
+* Identify bottlenecks and optimize the API for better performance
+* Ensure the API can handle a large number of concurrent requests
+
+**Tools**
+---------------------------
+
+* **Docker**: Used to containerize the API and WireMock services
+* **Prometheus**: Used for monitoring and collecting metrics
+* **Grafana**: Used for visualizing metrics and dashboards
+* **K6**: Used for making http requests to api for performance testing
+
+**Configuration**
+-----------------------------------
+
+The performance testing configuration is defined in the `docker-compose.yml` file. The configuration includes:
+
+* **holyquranapi**: The API service built using Spring Boot
+* **docker-wiremock**: The WireMock service used for mocking backend services
+* **prometheus**: The Prometheus service used for monitoring and collecting metrics
+* **grafana**: The Grafana service used for visualizing metrics and dashboards
+
+
+**Running Performance Tests**
+---------------------------
+
+To run the performance tests, follow these steps:
+
+1. Start the Docker containers using `docker-compose up`
+2. Run the performance testing tool K6 using the command ```k6 run load-test.js ```  being in project root. Before starting k6 test, we should have k6 install.Follow k6 installation steps for more details.
+3. Monitor the metrics using Prometheus and Grafana
+4. Analyze the results and identify bottlenecks and areas for optimization
+
+**Optimization and Tuning**
+-------------------------
+
+Based on the performance testing results, the following optimizations and tunings can be made:
+
+* **Tuning JVM settings**: Adjusting JVM settings such as heap size, garbage collection, and thread pool size
+* **Optimizing database queries**: Optimizing database queries to reduce latency and improve throughput
+* **Caching**: Implementing caching mechanisms to reduce the load on the API
+* **Load balancing**: Implementing load balancing to distribute the load across multiple instances of the API
+
+By following this performance testing strategy and configuration, we can ensure that the Holy Quran API is optimized for better performance and can handle a large number of concurrent requests.
+
+
+**Install K6 on Windows, Linux, and macOS**
+-------------------------------------------------------
+
+**Windows**
+
+1. Download the K6 installer for Windows from the official K6 website: <https://k6.io/docs/get-started/installation/>
+2. Run the installer and follow the prompts to install K6.
+3. Once the installation is complete, open a new command prompt or PowerShell window.
+4. Verify that K6 is installed by running the command `k6 version`.
+
+**Linux (Fedora/CentOS)**
+
+1. Open a terminal window and run the following commands:
+```
+sudo dnf install https://dl.k6.io/rpm/repo.rpm
+sudo dnf install k6
+```
+2. Once the installation is complete, verify that K6 is installed by running the command `k6 version`.
+
+**Linux (Debian/Ubuntu)**
+
+1. Open a terminal window and run the following commands:
+```
+sudo gpg -k
+sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt-get update
+sudo apt-get install k6
+```
+2. Once the installation is complete, verify that K6 is installed by running the command `k6 version`.
+
+
+**macOS (using Homebrew)**
+
+1. Open a terminal window and run the following command to install K6 using Homebrew:
+```
+brew install k6
+```
+
+**Note**: You can always follow the updated installation guide in following link <https://k6.io/docs/get-started/installation/>
+
+That's it! You should now have K6 installed on your system.
 
 ## Contributing
 
