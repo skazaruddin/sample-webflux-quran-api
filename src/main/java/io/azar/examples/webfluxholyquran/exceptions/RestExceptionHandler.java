@@ -1,18 +1,15 @@
-package io.azar.examples.webfluxholyquran.config;
+package io.azar.examples.webfluxholyquran.exceptions;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.*;
-import com.fasterxml.jackson.databind.util.ExceptionUtil;
+import io.azar.examples.webfluxholyquran.controller.QuranController;
 import io.azar.examples.webfluxholyquran.dto.ApiError;
-import io.azar.examples.webfluxholyquran.exceptions.BusinessException;
-import io.azar.examples.webfluxholyquran.exceptions.TechnicalException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.el.util.ExceptionUtils;
-import org.springframework.core.codec.DecodingException;
+import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -37,16 +34,15 @@ class RestExceptionHandler {
 	}
 
 	@ExceptionHandler(Exception.class)
-	public Mono<ResponseEntity<ApiError>> handleAnyException(Exception ex) {
-		ex.printStackTrace();
+	public Mono<ResponseEntity<ApiError>> handleAnyException(Exception exception) {
+		log.error("Exception", exception);
 		return Mono.just(ResponseEntity.internalServerError().body(new ApiError("01", "Internal error")));
 	}
 
 	@ExceptionHandler(ServerWebInputException.class)
-	public Mono<ResponseEntity<ApiError>> handleServerWebInputException(ServerWebInputException ex) {
-		ex.printStackTrace();
-		Throwable rootCause = ex.getRootCause();
-
+	public Mono<ResponseEntity<ApiError>> handleServerWebInputException(ServerWebInputException exception) {
+		log.error("Exception", exception);
+		Throwable rootCause = exception.getRootCause();
 		if (rootCause instanceof InvalidFormatException) {
 			InvalidFormatException invalidFormatException = (InvalidFormatException) rootCause;
 			return Mono.just(ResponseEntity.badRequest()
@@ -77,7 +73,7 @@ class RestExceptionHandler {
 						"Invalid body field: ".concat(invalidTypeIdException.getPath().get(0).getFieldName()))));
 		}
 
-		String reason = ex.getReason();
+		String reason = exception.getReason();
 		switch (reason) {
 			case "No request body":
 				return Mono.just(ResponseEntity.badRequest().body(new ApiError("22", "Missing request body")));
@@ -107,10 +103,32 @@ class RestExceptionHandler {
 		List<FieldError> fieldErrors = bindingResult.getFieldErrors();
 		String errorFields = fieldErrors.stream().map(FieldError::getField).collect(Collectors.joining(", "));
 
-		return Mono.just(ResponseEntity.internalServerError()
+		return Mono.just(ResponseEntity.badRequest()
 			.body(new ApiError("10", "Invalid body fields: ".concat(errorFields))
-
 			));
+	}
+
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public Mono<ResponseEntity<ApiError>> handleConstraintViolation(ConstraintViolationException e) {
+		ConstraintViolation constraintViolation = (ConstraintViolation )e.getConstraintViolations().toArray()[0];
+
+		if(constraintViolation.getRootBean() instanceof QuranController) {
+			PathImpl path = (PathImpl) constraintViolation.getPropertyPath();
+			if(path.asString().equals("saveSurah.xapiKey")){
+				return Mono.just(ResponseEntity.badRequest()
+						.body(new ApiError("26", "Invalid header: ".concat("X-API-Key"))
+						));
+			}
+		}
+		String errorFields = e.getConstraintViolations()
+				.stream()
+				.map(ConstraintViolation::getMessage)
+				.collect(Collectors.joining(", "));
+
+		return Mono.just(ResponseEntity.badRequest()
+				.body(new ApiError("10", "Invalid Request. Error details : ".concat(errorFields))
+				));
 	}
 
 }

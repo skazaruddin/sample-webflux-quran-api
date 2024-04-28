@@ -8,6 +8,6 @@ public interface QuranService {
 
 	Mono<SurahResponseDto> findSurahByChapterAndEdition(int chapter, String edition);
 
-	Mono<Void> createSurah(CreateSurahDTO createSurahDTO);
+	Mono<String> createSurah(CreateSurahDTO createSurahDTO);
 
 }

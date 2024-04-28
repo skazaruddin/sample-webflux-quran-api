@@ -10,32 +10,32 @@ import java.util.List;
 
 @Data
 public class CreateSurahDTO {
-
+	private static final int MIN_CHAPTER_NO = 1;
 	private static final int MAX_CHAPTER_NO = 114;
 
-	private static final int MIN_CHAPTER_NO = 1;
+	private static final int MIN_AYAH_NO = 1;
+	private static final int MAX_AYAH_NO = 6556;
 
-	@Max(value = MAX_CHAPTER_NO)
 	@Min(value = MIN_CHAPTER_NO)
+	@Max(value = MAX_CHAPTER_NO)
 	private int number;
 
-	@Pattern(regexp = "\\w")
+	@Pattern(regexp = "^[\\p{L}-]+$")
 	private String name;
 
-	@Pattern(regexp = "\\w")
-	@JsonProperty("englishName")
+	@Pattern(regexp = "^[A-Za-z0-9]+([A-Za-z0-9- ]+)?$")
 	private String englishName;
 
-	@Pattern(regexp = "\\w")
-	@JsonProperty("englishNameTranslation")
+	@Pattern(regexp = "^[A-Za-z0-9]+([A-Za-z0-9- ]+)?$")
 	private String englishNameTranslation;
 
-	@Pattern(regexp = "\\w")
-	@JsonProperty("revelationType")
+	@Pattern(regexp = "^[A-Za-z]{3,255}$")
 	private String revelationType;
 
+	@Min(value = MIN_AYAH_NO)
+	@Max(value = MAX_AYAH_NO)
 	@JsonProperty("numberOfAyahs")
-	private int numberOfAyahs;
+	private Integer numberOfAyahs;
 
 	private List<CreateSurahDTO.Ayah> ayahs;
 

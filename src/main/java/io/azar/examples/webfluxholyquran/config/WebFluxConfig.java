@@ -105,7 +105,7 @@ public class WebFluxConfig implements WebFluxConfigurer {
 	}
 
 	@Bean
-	@Profile({ "unit-test", "local", "docker" })
+	@Profile({ "unit-test", "local", "docker", "default" })
 	public WebClient getHttpWebClient(WebClient.Builder builder) throws Exception {
 
 		HttpClient client = HttpClient.create()

@@ -3,11 +3,15 @@ package io.azar.examples.webfluxholyquran.service;
 import io.azar.examples.webfluxholyquran.dto.CreateSurahDTO;
 import io.azar.examples.webfluxholyquran.dto.SurahResponseDto;
 import io.azar.examples.webfluxholyquran.repository.QuranRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
+@Slf4j
 public class QuranServiceImpl implements QuranService {
 
 	@Autowired
@@ -19,8 +23,8 @@ public class QuranServiceImpl implements QuranService {
 	}
 
 	@Override
-	public Mono<Void> createSurah(CreateSurahDTO createSurahDTO) {
-		return null;
+	public Mono<String> createSurah(CreateSurahDTO createSurahDTO) {
+		return Mono.just(UUID.randomUUID().toString());
 	}
 
 }

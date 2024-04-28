@@ -5,9 +5,10 @@ import io.azar.examples.webfluxholyquran.dto.SurahResponseDto;
 import io.azar.examples.webfluxholyquran.service.QuranService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -40,9 +41,11 @@ public class QuranController {
 	}
 
 	@PostMapping
-	public Mono<Void> saveSurah(@Pattern(regexp = "[A-Za-z0-9]") @RequestHeader(name = "X-API-Key") String apiKey,
-			@Valid @RequestBody CreateSurahDTO createSurahDTO) {
-		return quranService.createSurah(createSurahDTO);
-	}
+	public Mono<ResponseEntity<Void>> saveSurah(@Pattern(regexp = "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$") @RequestHeader(name = "X-API-Key") String xapiKey,
+												@Valid @RequestBody CreateSurahDTO createSurahDTO) {
 
+		return quranService.createSurah(createSurahDTO)
+				.map(userUUID -> UriComponentsBuilder.fromPath(("/{id}")).buildAndExpand(userUUID).toUri())
+				.map(uri -> ResponseEntity.created(uri).build());
+	}
 }
